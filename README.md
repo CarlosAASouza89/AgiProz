@@ -6,11 +6,51 @@ Sistema acadêmico para controle de clientes, empréstimos, parcelas, pagamentos
 
 - Python 3.12
 - Flask
-- SQLite para uso local
-- PostgreSQL para hospedagem
+- SQLite para desenvolvimento local
+- PostgreSQL para o ambiente hospedado
 - HTML, CSS e JavaScript no frontend
 - Gunicorn para execução no Render
-- Supabase como banco PostgreSQL
+- Supabase como serviço de banco PostgreSQL
+
+## Arquitetura de execução
+
+O AgiProz utiliza a mesma aplicação nos dois ambientes. A diferença está no banco de dados utilizado pela camada de acesso a dados.
+
+```text
+                         AGIPROZ
+                            │
+                    DATABASE_URL?
+                            │
+              ┌─────────────┴─────────────┐
+              │                           │
+             NÃO                         SIM
+              │                           │
+              ▼                           ▼
+          SQLite local              PostgreSQL
+              │                           │
+              ▼                           ▼
+       VS Code + Flask             Supabase + Render
+```
+
+A variável `DATABASE_URL` é o mecanismo que determina qual banco será utilizado:
+
+```text
+DATABASE_URL não definida
+        │
+        ▼
+SQLite
+instance/agiproz.sqlite3
+
+DATABASE_URL definida
+        │
+        ▼
+PostgreSQL
+Supabase
+```
+
+Essa abordagem evita manter duas implementações da aplicação. O arquivo `db_adapter.py` concentra a diferença de conexão e compatibilidade entre SQLite e PostgreSQL, enquanto as regras de negócio permanecem na aplicação.
+
+Os dois ambientes possuem bancos independentes. Dados cadastrados no SQLite local não são enviados automaticamente ao Supabase, e dados do Supabase não são copiados automaticamente para o SQLite local.
 
 ## Estrutura
 
@@ -28,34 +68,68 @@ AgiProz/
 ├── Procfile
 ├── runtime.txt
 ├── .env.example
-└── documentação
+├── README.md
+├── PLATAFORMA.md
+├── COMO_INICIAR.md
+├── DEPLOY_SUPABASE_RENDER.md
+├── GITHUB_PASSO_A_PASSO.md
+└── GUIA-CODIGO.md
 ```
+
+## Requisitos
+
+### Desenvolvimento local
+
+- Windows 10/11;
+- Python 3.12;
+- VS Code (recomendado);
+- navegador web atualizado.
+
+### Ambiente hospedado
+
+- conta no GitHub;
+- projeto no Supabase;
+- serviço no Render.
 
 ## Execução local
 
 1. Instale o Python 3.12.
-2. Crie um ambiente virtual:
+2. Abra a pasta do projeto no VS Code.
+3. Abra `Terminal → Novo Terminal`.
+4. Crie um ambiente virtual:
 
 ```bash
 python -m venv .venv
 ```
 
-3. Ative o ambiente virtual.
-4. Instale as dependências:
+5. Ative o ambiente virtual.
+6. Instale as dependências:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-5. Inicie a aplicação:
+7. Inicie a aplicação:
 
 ```bash
 python app.py
 ```
 
-6. Acesse `http://127.0.0.1:5500`.
+8. Acesse `http://127.0.0.1:5500`.
 
-Sem `DATABASE_URL`, o sistema utiliza SQLite e cria o banco em `instance/agiproz.sqlite3`.
+Por padrão, a execução local não exige `DATABASE_URL`. Sem essa variável, o sistema utiliza SQLite e cria o banco em `instance/agiproz.sqlite3`.
+
+Para executar localmente usando PostgreSQL, configure `DATABASE_URL` antes de iniciar a aplicação. Nesse caso, o SQLite local não será utilizado.
+
+## Banco local
+
+Quando o AgiProz é executado sem `DATABASE_URL`, o banco SQLite fica em:
+
+```text
+instance/agiproz.sqlite3
+```
+
+A pasta `instance/` contém dados específicos do ambiente local e não deve ser enviada ao GitHub. O `.gitignore` do projeto já impede o versionamento dessa pasta e dos arquivos de banco local.
 
 ## Primeiro acesso
 
@@ -67,7 +141,7 @@ O banco inicia sem usuários. Na primeira abertura, crie o administrador com um 
 - um caractere especial;
 - nenhum espaço.
 
-A chave de recuperação do administrador é exibida após o cadastro e novamente após cada recuperação, sempre com rotação da chave anterior. No ambiente local, uma cópia também é gravada em `instance/admin_recovery_code.txt`. No ambiente hospedado com Supabase/Render, não há arquivo local para essa chave; ela deve ser guardada em local seguro. O diretório `instance/` não deve ser enviado ao GitHub.
+A chave de recuperação do administrador é exibida após o cadastro e novamente após cada recuperação, sempre com rotação da chave anterior. No ambiente local, uma cópia também é gravada em `instance/admin_recovery_code.txt`. No ambiente hospedado com Supabase/Render, não há arquivo local para essa chave; ela deve ser guardada em local seguro.
 
 ## Usuários
 
@@ -116,10 +190,24 @@ Os testes cobrem o primeiro acesso, autenticação, usuários, empréstimos, cal
 A configuração recomendada para a publicação é:
 
 ```text
-GitHub → Render → Supabase PostgreSQL
+VS Code
+   ↓
+Git
+   ↓
+GitHub
+   ↓
+Render ──────────┐
+   ↓             │
+Flask/Gunicorn   │
+                 ▼
+          PostgreSQL
+                 ↓
+              Supabase
 ```
 
-Consulte `DEPLOY_SUPABASE_RENDER.md` para o passo a passo.
+No ambiente hospedado, `DATABASE_URL` deve conter a conexão PostgreSQL do Supabase. O Render fornece essa variável à aplicação durante a execução.
+
+Consulte `DEPLOY_SUPABASE_RENDER.md` para o passo a passo de implantação.
 
 Nunca envie para o GitHub:
 
@@ -127,8 +215,18 @@ Nunca envie para o GitHub:
 - `instance/`;
 - bancos SQLite;
 - senhas;
-- `DATABASE_URL`;
-- chaves de recuperação.
+- `DATABASE_URL` com credenciais;
+- chaves de recuperação;
+- chaves secretas.
+
+## Documentação do projeto
+
+- `PLATAFORMA.md`: arquitetura e funcionamento dos ambientes local e hospedado.
+- `COMO_INICIAR.md`: execução local pelo VS Code.
+- `DEPLOY_SUPABASE_RENDER.md`: implantação no Supabase e Render.
+- `GITHUB_PASSO_A_PASSO.md`: publicação e organização do código no GitHub.
+- `GUIA-CODIGO.md`: descrição dos principais arquivos e componentes.
+- `casos-de-teste.md`: cenários utilizados na validação da aplicação.
 
 ## Observação acadêmica
 

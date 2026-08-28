@@ -1,0 +1,32 @@
+# Ambiente Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Segredos
+.env
+.env.*
+!.env.example
+
+# Banco e dados locais
+instance/
+*.sqlite3
+*.sqlite
+*.db
+
+# Arquivos temporários e do Windows
+*.log
+Thumbs.db
+.DS_Store
+
+# IDE
+.vscode/*.user
+
+# Cobertura e ferramentas
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/

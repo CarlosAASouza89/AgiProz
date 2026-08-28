@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="description" content="AgiProz — sistema acadêmico de controle de empréstimos.">
+    <title>AgiProz | Empréstimo Rápido. Cobrança Certa</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="assets/agiproz.ico">
+  <meta name="theme-color" content="#111111">
+  </head>
+  <body>
+    <div id="toast" class="toast" role="status" aria-live="polite">
+    </div>
+    <section id="authView" class="auth-layout">
+      <div class="login-art-panel">
+        <div class="art-glow">
+        </div>
+        <div class="brand-lockup">
+          <div class="logo-mark">
+            <img src="assets/agiproz-logo.png" alt="Logo AgiProz">
+          </div>
+          <div>
+            <strong>AgiProz</strong>
+            <span>GESTÃO DE EMPRÉSTIMOS</span>
+          </div>
+        </div>
+        <img class="login-art-image" src="assets/agiproz-banner-primario.png" alt="Identidade visual do AgiProz">
+        <div class="login-illustration" aria-hidden="true">
+          <div class="coin coin-a">$</div>
+          <div class="coin coin-b">R$</div>
+          <div class="receipt">
+          </div>
+          <div class="person-head">
+          </div>
+          <div class="person-body">
+          </div>
+          <div class="tie">
+          </div>
+          <div class="briefcase">
+          </div>
+          <div class="shine">
+          </div>
+        </div>
+        <div class="brand-copy">
+          <p class="eyebrow">AGIPROZ</p>
+          <h1>EMPRÉSTIMO RÁPIDO.<br>
+            <span>COBRANÇA CERTA.</span>
+          </h1>
+          <p>Sistema acadêmico para gestão de empréstimos.</p>
+        </div>
+      </div>
+      <div class="auth-card">
+        <div class="auth-role">
+          <span class="role-dot">
+          </span>
+          <span id="authRoleText">Acesso ao sistema</span>
+        </div>
+        <form id="loginForm" class="auth-form">
+          <h2>Entrar</h2>
+          <p>Use seu usuário e senha fornecidos pelo administrador.</p>
+          <label>Login ou e-mail<input id="loginEmail" type="text" autocomplete="username" required>
+          </label>
+          <label>Senha<input id="loginPassword" type="password" autocomplete="current-password" minlength="8" required>
+          </label>
+          <button class="btn primary" type="submit">Entrar no AgiProz</button>
+          <button id="adminRecoveryBtn" class="btn secondary" type="button">Esqueci a senha do administrador</button>
+        </form>
+        <form id="adminSetupForm" class="auth-form hidden">
+          <h2>Primeiro acesso</h2>
+          <p>Configure o administrador principal. Depois disso, somente ele poderá criar operadores.</p>
+          <label>Nome do administrador<input id="setupName" type="text" maxlength="80" required>
+          </label>
+          <label>E-mail corporativo<input id="setupEmail" type="email" maxlength="120" value="admin@agiproz.local" required><small class="muted">Recomendado para o administrador: admin@agiproz.local</small>
+          </label>
+          <label>Senha<input id="setupPassword" type="password" minlength="8" required><small class="muted">Mínimo de 8 caracteres, com uma letra maiúscula, um número e um caractere especial.</small>
+          </label>
+          <label>Confirmar senha<input id="setupPassword2" type="password" minlength="8" required>
+          </label>
+          <button class="btn primary" type="submit">Criar administrador</button>
+        </form>
+        <p id="setupHint" class="setup-hint hidden">Se este for o primeiro uso, configure o administrador acima.</p>
+        <footer class="auth-footer">
+          <p>Autores: Carlos, Luís S., Nelson e Vinicius.</p>
+          <p>Projeto acadêmico</p>
+          <p>AgiProz</p>
+        </footer>
+      </div>
+    </section>
+    <section id="appView" class="app-shell hidden">
+      <aside class="sidebar">
+        <div class="sidebar-brand">
+          <div class="logo-mark small">
+            <img src="assets/agiproz-logo.png" alt="Logo AgiProz">
+          </div>
+          <div>
+            <strong>AgiProz</strong>
+            <small>Empréstimo Rápido.</small>
+          </div>
+        </div>
+        <nav>
+          <button class="nav-item active" data-page="dashboard">📊 Visão Geral</button>
+          <button class="nav-item" data-page="clients">👥 Clientes</button>
+          <button class="nav-item" data-page="loans">💰 Empréstimos</button>
+          <button class="nav-item" data-page="payments">💳 Pagamentos</button>
+          <button class="nav-item" data-page="mailbox">✉️ Caixa de Entrada <span id="unreadBadge" class="mail-badge hidden">0</span></button>
+          <button class="nav-item admin-only" data-page="operators">🛡️ Operadores</button>
+          <button class="nav-item admin-only" data-page="audit">📜 Auditoria</button>
+          <button class="nav-item admin-only" data-page="tests">🧪 Testes</button>
+        </nav>
+        <div class="sidebar-footer">
+          <div>
+            <strong id="currentUser">
+            </strong>
+            <small id="currentRole">
+            </small>
+          </div>
+          <button id="logoutBtn" class="logout">Sair</button>
+        </div>
+      </aside>
+      <main class="main">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">SISTEMA DE CONTROLE</p>
+            <h1 id="pageTitle">Visão Geral</h1>
+          </div>
+          <div class="slogan">EMPRÉSTIMO RÁPIDO. <b>COBRANÇA CERTA.</b>
+          </div>
+        </header>
+        <div id="pageContent">
+        </div>
+        <footer class="site-footer">
+          <p>Autores: Carlos, Luís S., Nelson e Vinicius.</p>
+          <p>Projeto acadêmico</p>
+          <p>AgiProz</p>
+        </footer>
+      </main>
+    </section>
+    <template id="dashboardTpl">
+      <div class="page">
+        <div class="hero">
+          <div>
+            <h2>Bem-vindo ao AgiProz.</h2>
+            <p>Controle clientes, contratos e pagamentos com praticidade e organização.</p>
+          </div>
+          <button class="btn primary" data-action="newLoan">+ Novo empréstimo</button>
+        </div>
+        <div class="stats">
+          <article class="stat">
+            <span>Clientes</span>
+            <strong id="statClients">0</strong>
+          </article>
+          <article class="stat">
+            <span>Empréstimos</span>
+            <strong id="statLoans">0</strong>
+          </article>
+          <article class="stat">
+            <span>Em aberto</span>
+            <strong id="statOpen">R$ 0,00</strong>
+          </article>
+          <article class="stat">
+            <span>Em atraso</span>
+            <strong id="statLate">0</strong>
+          </article>
+        </div>
+        <div class="grid-2">
+          <section class="panel">
+            <div class="panel-head">
+              <h3>Últimos empréstimos</h3>
+              <button class="link-btn" data-page-link="loans">Ver todos</button>
+            </div>
+            <div id="recentLoans">
+            </div>
+          </section>
+          <section class="panel quote">
+            <span class="quote-mark">“</span>
+            <h3>Filosofia do AgiProz</h3>
+            <p>“A gente corre para liberar. O sistema corre para lembrar o vencimento.”</p>
+            <small>— AgiProz</small>
+          </section>
+        </div>
+      </div>
+    </template>
+    <template id="clientsTpl">
+      <div class="page">
+        <div class="section-head">
+          <div>
+            <h2>Clientes</h2>
+            <p>Cadastro e consulta dos clientes do sistema.</p>
+          </div>
+          <button class="btn primary" data-action="newClient">+ Cadastrar cliente</button>
+        </div>
+        <section class="panel">
+          <div class="toolbar">
+            <input id="clientSearch" placeholder="Buscar por nome, CPF ou e-mail...">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>CPF</th>
+                  <th>Contato</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="clientTable">
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </template>
+    <template id="loansTpl">
+      <div class="page">
+        <div class="section-head">
+          <div>
+            <h2>Empréstimos</h2>
+            <p>Controle de contratos, parcelas e comunicações de cobrança.</p>
+          </div>
+          <button class="btn primary" data-action="newLoan">+ Novo empréstimo</button>
+        </div>
+        <section class="panel">
+          <div class="toolbar">
+            <select id="loanFilter">
+              <option value="all">Todos</option>
+              <option value="open">Em aberto</option>
+              <option value="late">Em atraso</option>
+              <option value="paid">Quitados</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Valor</th>
+                  <th>Parcelas</th>
+                  <th>Periodicidade</th>
+                  <th>Próximo venc.</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="loanTable">
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </template>
+    <template id="paymentsTpl">
+      <div class="page">
+        <div class="section-head">
+          <div>
+            <h2>Pagamentos</h2>
+            <p>Registre pagamentos, acompanhe vencimentos e envie lembretes pelo WhatsApp.</p>
+          </div>
+        </div>
+        <section class="panel">
+          <div class="toolbar">
+            <input id="paymentSearch" placeholder="Buscar cliente...">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Cliente</th>
+                  <th>Contrato</th>
+                  <th>Parcela</th>
+                  <th>Periodicidade</th>
+                  <th>Valor</th>
+                  <th>Vencimento</th>
+                  <th>Status</th>
+                  <th>Ação</th>
+                </tr>
+              </thead>
+              <tbody id="paymentTable">
+              </tbody>
+            </table>
+          </div>
+        </section>
+        <section class="panel payment-history-panel">
+          <div class="panel-head">
+            <div>
+              <h3>Histórico de pagamentos</h3>
+              <p class="muted">Se um pagamento for confirmado por engano, use <b>Desfazer</b>. Por segurança, somente o último pagamento de cada contrato pode ser desfeito.</p>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Cliente</th><th>Contrato</th><th>Parcela</th><th>Valor</th><th>Data</th><th>Ação</th></tr></thead>
+              <tbody id="paymentHistory"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </template>
+    <template id="mailboxTpl">
+      <div class="page">
+        <div class="section-head">
+          <div>
+            <h2>Correio Corporativo</h2>
+            <p>Comunicação interna gratuita entre administradores e operadores do AgiProz.</p>
+          </div>
+          <button class="btn primary" data-action="newMessage">+ Nova mensagem</button>
+        </div>
+        <section class="panel">
+          <div class="admin-banner">
+            <strong>✉️ E-mail corporativo interno</strong>
+            <span>Endereços no padrão <b>@agiproz.local</b>. Recurso acadêmico local: não envia mensagens para a Internet.</span>
+          </div>
+          <div class="mail-toolbar">
+            <div class="mail-tabs">
+              <button class="mail-tab active" data-mail-filter="inbox">📥 Caixa de Entrada</button>
+              <button class="mail-tab" data-mail-filter="sent">📤 Enviados</button>
+              <button class="mail-tab" data-mail-filter="drafts">📝 Rascunhos</button>
+              <button class="mail-tab" data-mail-filter="archive">🗄️ Arquivados</button>
+              <button class="mail-tab" data-mail-filter="trash">🗑️ Lixeira</button>
+            </div>
+            <span id="mailboxSummary" class="muted"></span>
+          </div>
+          <div id="mailboxList" class="mailbox-list"></div>
+        </section>
+      </div>
+    </template>
+    <template id="operatorsTpl">
+      <div class="page">
+        <div class="section-head">
+          <div>
+            <h2>Gestão de operadores</h2>
+            <p>Área exclusiva do administrador para criar e controlar os acessos.</p>
+          </div>
+          <button class="btn primary" data-action="newOperator">+ Criar operador</button>
+        </div>
+        <section class="panel">
+          <div class="admin-banner">
+            <strong>🛡️ Área administrativa</strong>
+            <span>Somente administradores visualizam esta tela e a aba Testes.</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Operador</th>
+                  <th>E-mail</th>
+                  <th>Perfil</th>
+                  <th>Status</th>
+                  <th>Ações</th>
+                </tr>
+              </thead>
+              <tbody id="operatorTable">
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </template>
+    <template id="auditTpl">
+      <div class="page">
+        <div class="section-head">
+          <div>
+            <h2>Auditoria</h2>
+            <p>Registro das principais ações realizadas no sistema.</p>
+          </div>
+        </div>
+        <section class="panel">
+          <div class="admin-banner">
+            <strong>📜 Registro de auditoria</strong>
+            <span>Área exclusiva do administrador.</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Data</th><th>Usuário</th><th>Ação</th><th>Entidade</th><th>Detalhes</th></tr></thead>
+              <tbody id="auditTable"></tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </template>
+    <template id="testsTpl">
+      <div class="page">
+        <div class="section-head">
+          <div>
+            <h2>Testes internos</h2>
+            <p>Área exclusiva do administrador para validar as regras principais do sistema.</p>
+          </div>
+          <button class="btn secondary" data-action="runTests">Executar testes</button>
+        </div>
+        <section class="panel">
+          <div class="admin-banner">
+            <strong>🧪 Ambiente de testes</strong>
+            <span>Não visível para operadores.</span>
+          </div>
+          <div id="testResults" class="test-results">
+            <p>Execute os testes para validar as regras principais.</p>
+          </div>
+        </section>
+      </div>
+    </template>
+    <div id="modalRoot">
+    </div>
+    <script src="app.js">
+    </script>
+  </body>
+</html>
